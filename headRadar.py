@@ -37,9 +37,7 @@ class HeadRadar:
     def setUpOfHead(self, state):
         self.__upOfHead = state
 
-    def printHead(self):
-        print(self.__downOfHead.value)
-
+   
 
 class Threats (Enum):
 
@@ -48,8 +46,3 @@ class Threats (Enum):
     WALL = "wall"
     NONE = "none"
 
-if __name__ == "__main__":
-    head = HeadRadar()
-    threats = Threats.APPLE
-    head.setDownOfHead(threats)
-    head.printHead()
