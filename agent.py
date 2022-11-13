@@ -19,6 +19,7 @@ class Agent:
         if store_history:
             self.__history.append(self.__score)
         self.__state = State()
+        self.__env.update_state(self.__state, self.__env.player_position)
         self.__score = 0
         self.__temperature = 0
 

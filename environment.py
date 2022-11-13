@@ -42,23 +42,25 @@ class Environment:
         self.__reward_wall = -2 * self.__reward_goal
 
     def do(self, state, action):
+        new_state = State()
         move = ACTION_MOVE[action]
         new_player_position = (self.player_position[0] + move[0], self.player_position[1] + move[1])
 
         if new_player_position not in self.__positions \
                 or self.__positions[new_player_position] == MAP_WALL:
             reward = self.__reward_wall
+            self.update_state(new_state, self.player_position)
         else:
             self.__positions[self.player_position] = MAP_NOTHING
             self.__positions[new_player_position] = MAP_PLAYER
             self.player_position = new_player_position
-            self.update_state(state, new_player_position)
+            self.update_state(new_state, new_player_position)
             if new_player_position == self.__goal:
                 reward = self.__reward_goal
             else:
                 reward = REWARD_DEFAULT
 
-        return state, reward
+        return new_state, reward
 
     def update_state(self, state: State, new_player_position):
         up = (new_player_position[0] + ACTION_MOVE[ACTION_UP][0], new_player_position[1] + ACTION_MOVE[ACTION_UP][1])
