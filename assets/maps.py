@@ -1,5 +1,3 @@
-
-
 MAP = """
 ################
 # .            #
@@ -16,5 +14,6 @@ MAP = """
 """
 
 MAP_WALL = '#'
-MAP_START = '.'
+MAP_PLAYER = '.'
 MAP_GOAL = '*'
+MAP_NOTHING = ' '

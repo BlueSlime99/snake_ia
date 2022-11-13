@@ -1,13 +1,8 @@
-import arcade
 import os
-import pickle
-import time
-import matplotlib.pyplot as plt
 
-from random import *
+import arcade
+
 from agent import Agent
-
-from assets.maps import MAP
 from environment import *
 
 SPRITE_SCALE = 0.33
@@ -34,26 +29,27 @@ class MazeWindow(arcade.Window):
 
         self.__player = arcade.Sprite(':resources:images/enemies/wormPink.png', SPRITE_SCALE)
         self.__player.center_x, self.__player.center_y \
-                                = self.state_to_xy(self.__agent.state)
+            = self.state_to_xy(self.__agent.environment.player_position)
 
         self.__goal = arcade.Sprite(':resources:images/enemies/bee.png', SPRITE_SCALE)
         self.__goal.center_x, self.__goal.center_y \
-                                = self.state_to_xy(self.__agent.environment.goal)
+            = self.state_to_xy(self.__agent.environment.goal)
 
         self.__sound = arcade.Sound(':resources:sounds/rockHit2.wav')
-        
+
     def state_to_xy(self, state):
-        return (state[1] + 0.5) * SPRITE_SIZE,\
+        return (state[1] + 0.5) * SPRITE_SIZE, \
                (self.__agent.environment.height - state[0] - 0.5) * SPRITE_SIZE
-    
+
     def on_draw(self):
         arcade.start_render()
         self.__walls.draw()
         self.__player.draw()
         self.__goal.draw()
-        arcade.draw_text(f'#{self.__iteration} Score: {self.__agent.score} T°C: {round(self.__agent.temperature * 100, 2)}',
-                         10, 10,
-                         arcade.csscolor.WHITE, 20)
+        arcade.draw_text(
+            f'#{self.__iteration} Score: {self.__agent.score} T°C: {round(self.__agent.temperature * 100, 2)}',
+            10, 10,
+            arcade.csscolor.WHITE, 20)
 
     def on_update(self, delta_time):
         if self.__agent.state != self.__agent.environment.goal:
@@ -61,16 +57,17 @@ class MazeWindow(arcade.Window):
         else:
             self.__agent.environment.reset_apple()
             self.__goal.center_x, self.__goal.center_y \
-                                = self.state_to_xy(self.__agent.environment.goal)
+                = self.state_to_xy(self.__agent.environment.goal)
             self.__iteration += 1
-            #self.__sound.play()
-        
+            # self.__sound.play()
+
         self.__player.center_x, self.__player.center_y \
-                                = self.state_to_xy(self.__agent.state)
+            = self.state_to_xy(self.__agent.environment.player_position)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.H:
             self.__agent.heat()
+
 
 if __name__ == "__main__":
     env = Environment(MAP)
@@ -78,8 +75,8 @@ if __name__ == "__main__":
 
     if os.path.exists(FILE_AGENT):
         agent.load(FILE_AGENT)
-        #plt.plot(agent.history)
-        #plt.show()
+        # plt.plot(agent.history)
+        # plt.show()
 
     window = MazeWindow(agent)
     window.setup()

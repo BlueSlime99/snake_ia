@@ -1,17 +1,13 @@
-
-import random
-from environment import *
 import pickle
+import random
+
+from environment import *
+from state import State
 
 
 class Agent:
-    def __init__(self, env, alpha = 1, gamma = 0.8, cooling_rate = 0.999):
+    def __init__(self, env, alpha=1, gamma=0.8, cooling_rate=0.999):
         self.__qtable = {}
-        for state in env.states:
-            self.__qtable[state] = {}
-            for action in ACTIONS:
-                self.__qtable[state][action] = 0.0
-        
         self.__env = env
         self.__alpha = alpha
         self.__gamma = gamma
@@ -19,10 +15,10 @@ class Agent:
         self.__cooling_rate = cooling_rate
         self.reset(False)
 
-    def reset(self, store_history = True):
+    def reset(self, store_history=True):
         if store_history:
             self.__history.append(self.__score)
-        self.__state = self.__env.start
+        self.__state = State()
         self.__score = 0
         self.__temperature = 0
 
@@ -34,18 +30,28 @@ class Agent:
             self.__temperature *= self.__cooling_rate
             return random.choice(ACTIONS)
         else:
-            q = self.__qtable[self.__state]
-            return max(q, key = q.get)
+            q = self.get_or_create(self.__qtable, self.__state)
+            return max(q, key=q.get)
+
+    def get_or_create(self, q_table, state):
+        hashed_state = hash(state)
+        if hashed_state not in q_table:
+            q_table[hashed_state] = {}
+            for action in ACTIONS:
+                q_table[hashed_state][action] = 0.0
+
+        return q_table[hashed_state]
 
     def step(self):
         action = self.best_action()
-        state, reward = self.__env.do(self.__state, action)
-        
-        maxQ = max(self.__qtable[state].values())
-        delta = self.__alpha * (reward + self.__gamma * maxQ - self.__qtable[self.__state][action])
-        self.__qtable[self.__state][action] += delta
-        
-        self.__state = state
+        new_state, reward = self.__env.do(self.__state, action)
+
+        new_state_actions = self.get_or_create(self.__qtable, new_state)
+        maxQ = max(new_state_actions.values())
+        delta = self.__alpha * (reward + self.__gamma * maxQ - self.__qtable[hash(self.__state)][action])
+        self.__qtable[hash(self.__state)][action] += delta
+
+        self.__state = new_state
         self.__score += reward
         return action, reward
 
@@ -76,4 +82,3 @@ class Agent:
     @property
     def temperature(self):
         return self.__temperature
-

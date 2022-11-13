@@ -4,13 +4,12 @@ from enum import Enum
 class AppleRadar:
 
     def __init__(self) -> None:
-
-        self.direction = Direction #Enum
-        self.distance = Distance #Enum
+        self.direction = Direction  # Enum
+        self.distance = Distance  # Enum
 
     @property
     def Appledirection(self):
-        return self.direction    
+        return self.direction
 
     @property
     def Appledistance(self):
@@ -20,9 +19,10 @@ class AppleRadar:
         self.direction = newDirection
 
     def setDistance(self, newDistance):
-        self.distance = newDistance  
+        self.distance = newDistance
 
-class Direction (Enum):
+
+class Direction(Enum):
     NORTH = "N"
     WEST = "W"
     EAST = "E"
@@ -32,11 +32,8 @@ class Direction (Enum):
     NORTH_EAST = "NE"
     SOUTH_EAST = "SE"
 
-   
 
-class Distance (Enum):
+class Distance(Enum):
     ONE = 1
     TWO = 2
     THREE_AND_MORE = 3
-
-
