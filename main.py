@@ -1,6 +1,7 @@
 import os
 
 import arcade
+import matplotlib.pyplot as plt
 
 from agent import Agent
 from environment import *
@@ -27,13 +28,13 @@ class MazeWindow(arcade.Window):
             sprite.center_x, sprite.center_y = self.state_to_xy(state)
             self.__walls.append(sprite)
 
-        self.__player = arcade.Sprite(':resources:images/enemies/wormPink.png', SPRITE_SCALE)
+        self.__player = arcade.Sprite(':resources:images/topdown_tanks/tileGrass1.png', SPRITE_SCALE)
         self.__player.center_x, self.__player.center_y \
             = self.state_to_xy(self.__agent.environment.player_position)
 
-        self.__goal = arcade.Sprite(':resources:images/enemies/bee.png', SPRITE_SCALE)
+        self.__goal = arcade.Sprite(':resources:images/tiles/mushroomRed.png', SPRITE_SCALE)
         self.__goal.center_x, self.__goal.center_y \
-            = self.state_to_xy(self.__agent.environment.goal)
+            = self.state_to_xy(self.__agent.environment.apple_position)
 
         self.__sound = arcade.Sound(':resources:sounds/rockHit2.wav')
 
@@ -52,12 +53,13 @@ class MazeWindow(arcade.Window):
             arcade.csscolor.WHITE, 20)
 
     def on_update(self, delta_time):
-        if self.__agent.state != self.__agent.environment.goal:
+        if self.__agent.environment.player_position != self.__agent.environment.apple_position:
             self.__agent.step()
         else:
-            self.__agent.environment.reset_apple()
+            self.__agent.environment.goal_reached()
+            self.__agent.reset()
             self.__goal.center_x, self.__goal.center_y \
-                = self.state_to_xy(self.__agent.environment.goal)
+                = self.state_to_xy(self.__agent.environment.apple_position)
             self.__iteration += 1
             # self.__sound.play()
 
@@ -75,11 +77,11 @@ if __name__ == "__main__":
 
     if os.path.exists(FILE_AGENT):
         agent.load(FILE_AGENT)
-        # plt.plot(agent.history)
-        # plt.show()
 
     window = MazeWindow(agent)
     window.setup()
     arcade.run()
 
     agent.save(FILE_AGENT)
+    plt.plot(agent.history)
+    plt.show()

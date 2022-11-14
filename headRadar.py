@@ -29,6 +29,3 @@ class HeadRadar:
         self.down = CHAR_TO_THREAT[down]
         self.left = CHAR_TO_THREAT[left]
         self.right = CHAR_TO_THREAT[right]
-
-    def __hash__(self) -> int:
-        return hash((self.up, self.down, self.left, self.right))

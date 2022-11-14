@@ -1,12 +1,11 @@
 import pickle
-import random
 
 from environment import *
 from state import State
 
 
 class Agent:
-    def __init__(self, env, alpha=1, gamma=0.8, cooling_rate=0.999):
+    def __init__(self, env, alpha=1, gamma=0.9, cooling_rate=0.999):
         self.__qtable = {}
         self.__env = env
         self.__alpha = alpha
@@ -35,22 +34,22 @@ class Agent:
             return max(q, key=q.get)
 
     def get_or_create(self, q_table, state):
-        hashed_state = hash(state)
-        if hashed_state not in q_table:
-            q_table[hashed_state] = {}
+        json_state = state.tojson()
+        if json_state not in q_table:
+            q_table[json_state] = {}
             for action in ACTIONS:
-                q_table[hashed_state][action] = 0.0
+                q_table[json_state][action] = 0.0
 
-        return q_table[hashed_state]
+        return q_table[json_state]
 
     def step(self):
         action = self.best_action()
-        new_state, reward = self.__env.do(self.__state, action)
+        new_state, reward = self.__env.do(action)
 
         new_state_actions = self.get_or_create(self.__qtable, new_state)
         maxQ = max(new_state_actions.values())
-        delta = self.__alpha * (reward + self.__gamma * maxQ - self.__qtable[hash(self.__state)][action])
-        self.__qtable[hash(self.__state)][action] += delta
+        delta = self.__alpha * (reward + self.__gamma * maxQ - self.__qtable[self.__state.tojson()][action])
+        self.__qtable[self.__state.tojson()][action] += delta
 
         self.__state = new_state
         self.__score += reward

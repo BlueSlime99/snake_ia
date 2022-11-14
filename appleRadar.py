@@ -4,33 +4,35 @@ from enum import Enum
 class AppleRadar:
 
     def __init__(self) -> None:
-        self.direction = Direction  # Enum
-        self.distance = Distance  # Enum
+        self.direction = ""
+        self.distance = Distance.THREE_AND_MORE
 
-    @property
-    def Appledirection(self):
-        return self.direction
+    def update(self, player_position, apple_position):
+        self.update_distance(player_position, apple_position)
+        self.update_direction(player_position, apple_position)
 
-    @property
-    def Appledistance(self):
-        return self.distance
+    def update_distance(self, player_position, apple_position):
+        self.distance = abs((apple_position[0] - player_position[0]) + (apple_position[1] - player_position[1]))
+        # if dist <= 1:
+        #     self.distance = Distance.ONE
+        # elif dist <= 2:
+        #     self.distance = Distance.TWO
+        # else:
+        #     self.distance = Distance.THREE_AND_MORE
 
-    def setDirection(self, newDirection):
-        self.direction = newDirection
+    def update_direction(self, player_position, apple_position):
+        result = ""
+        if player_position[1] < apple_position[1]:
+            result += "S"
+        elif player_position[1] > apple_position[1]:
+            result += "N"
 
-    def setDistance(self, newDistance):
-        self.distance = newDistance
+        if player_position[0] < apple_position[0]:
+            result += "E"
+        elif player_position[0] > apple_position[0]:
+            result += "W"
 
-
-class Direction(Enum):
-    NORTH = "N"
-    WEST = "W"
-    EAST = "E"
-    SOUTH = "S"
-    NORTH_WEST = "NW"
-    SOUTH_WEST = "SW"
-    NORTH_EAST = "NE"
-    SOUTH_EAST = "SE"
+        self.direction = result
 
 
 class Distance(Enum):
