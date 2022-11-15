@@ -1,6 +1,7 @@
 import random
 
 from assets.maps import *
+from snake import Snake
 from state import State
 
 ACTION_UP = 'U'
@@ -19,11 +20,15 @@ REWARD_DEFAULT = -1
 
 class Environment:
     def __init__(self, str_map):
+        self.__str_map = str_map
+        self.reset()
+
+    def reset(self):
         row = 0
         col = 0
-        self.player_positions = {}
+        self.snake = Snake()
         self.__positions = {}
-        str_map = str_map.strip()
+        str_map = self.__str_map.strip()
         for line in str_map.strip().split('\n'):
             for item in line:
                 self.__positions[row, col] = item
@@ -31,8 +36,7 @@ class Environment:
                     self.__apple_position = (row, col)
                 elif item == MAP_PLAYER:
                     self.__start = (row, col)
-                    self.player_position = self.__start
-                    self.player_positions[row, col] = self.__start
+                    self.snake.positions = [self.__start]
                 col += 1
             row += 1
             col = 0
@@ -46,25 +50,37 @@ class Environment:
     def do(self, action):
         new_state = State()
         move = ACTION_MOVE[action]
-        new_player_position = (self.player_position[0] + move[0], self.player_position[1] + move[1])
+        new_player_position = (
+            self.snake.get_head_position()[0] + move[0], self.snake.get_head_position()[1] + move[1])
 
         if new_player_position not in self.__positions \
-                or self.__positions[new_player_position] == MAP_WALL:
+                or self.__positions[new_player_position] in [MAP_WALL, MAP_PLAYER]:
             reward = self.__reward_wall
-            self.update_state(new_state, self.player_position)
-
+            self.update_state(new_state, self.snake.get_head_position())
+            self.reset()
 
         else:
-            self.__positions[self.player_position] = MAP_NOTHING
-            self.__positions[new_player_position] = MAP_PLAYER
-            self.player_position = new_player_position
+            self.remove_snake_from_positions()
             self.update_state(new_state, new_player_position)
             if new_player_position == self.__apple_position:
                 reward = self.__reward_goal
+                self.snake.grow(new_player_position)
+
             else:
+                self.snake.move(new_player_position)
                 reward = REWARD_DEFAULT
 
+            self.add_snake_to_positions()
+
         return new_state, reward
+
+    def remove_snake_from_positions(self):
+        for position in self.snake.positions:
+            self.__positions[position[0], position[1]] = MAP_NOTHING
+
+    def add_snake_to_positions(self):
+        for position in self.snake.positions:
+            self.__positions[position[0], position[1]] = MAP_PLAYER
 
     def update_state(self, state: State, new_player_position):
         up = (new_player_position[0] + ACTION_MOVE[ACTION_UP][0], new_player_position[1] + ACTION_MOVE[ACTION_UP][1])
@@ -103,13 +119,9 @@ class Environment:
     def is_wall(self, state):
         return self.__positions[state] == MAP_WALL
 
-
     def goal_reached(self):
         self.reset_apple()
-        self.grow_snake()
-
-    def grow_snake(self):
-        pass
+        # self.grow_snake()
 
     def reset_apple(self):
         x = random.randint(1, self.__rows - 2)

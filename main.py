@@ -28,9 +28,11 @@ class MazeWindow(arcade.Window):
             sprite.center_x, sprite.center_y = self.state_to_xy(state)
             self.__walls.append(sprite)
 
-        self.__player = arcade.Sprite(':resources:images/topdown_tanks/tileGrass1.png', SPRITE_SCALE)
-        self.__player.center_x, self.__player.center_y \
-            = self.state_to_xy(self.__agent.environment.player_position)
+        self.__player_parts = arcade.SpriteList()
+        initial_player = arcade.Sprite(':resources:images/topdown_tanks/tileGrass1.png', SPRITE_SCALE)
+        initial_player.center_x, initial_player.center_y \
+            = self.state_to_xy(self.__agent.environment.snake.get_head_position())
+        self.__player_parts.append(initial_player)
 
         self.__goal = arcade.Sprite(':resources:images/tiles/mushroomRed.png', SPRITE_SCALE)
         self.__goal.center_x, self.__goal.center_y \
@@ -45,7 +47,7 @@ class MazeWindow(arcade.Window):
     def on_draw(self):
         arcade.start_render()
         self.__walls.draw()
-        self.__player.draw()
+        self.__player_parts.draw()
         self.__goal.draw()
         arcade.draw_text(
             f'#{self.__iteration} Score: {self.__agent.score} T°C: {round(self.__agent.temperature * 100, 2)}',
@@ -53,7 +55,7 @@ class MazeWindow(arcade.Window):
             arcade.csscolor.WHITE, 20)
 
     def on_update(self, delta_time):
-        if self.__agent.environment.player_position != self.__agent.environment.apple_position:
+        if self.__agent.environment.snake.get_head_position() != self.__agent.environment.apple_position:
             self.__agent.step()
         else:
             self.__agent.environment.goal_reached()
@@ -63,8 +65,15 @@ class MazeWindow(arcade.Window):
             self.__iteration += 1
             # self.__sound.play()
 
-        self.__player.center_x, self.__player.center_y \
-            = self.state_to_xy(self.__agent.environment.player_position)
+        self.__player_parts.clear()
+        for position in self.__agent.environment.snake.positions:
+            part = arcade.Sprite(':resources:images/topdown_tanks/tileGrass1.png', SPRITE_SCALE)
+            part.center_x, part.center_y \
+                = self.state_to_xy(position)
+            self.__player_parts.append(part)
+        self.__goal = arcade.Sprite(':resources:images/tiles/mushroomRed.png', SPRITE_SCALE)
+        self.__goal.center_x, self.__goal.center_y \
+            = self.state_to_xy(self.__agent.environment.apple_position)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.H:
